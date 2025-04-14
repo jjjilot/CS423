@@ -158,51 +158,6 @@ class CustomMappingTransformer(BaseEstimator, TransformerMixin):
         return result
 
 
-class CustomRenamingTransformer(BaseEstimator, TransformerMixin):
-    """
-    A transformer that renames columns in a pandas DataFrame using a specified mapping.
-
-    Parameters
-    ----------
-    rename_dict : dict
-        A dictionary mapping existing column names to new column names.
-
-    Raises
-    ------
-    AssertionError
-        - If rename_dict is not a dictionary.
-        - If any key in rename_dict is not in the input DataFrame during transform.
-        - If transform is called on a non-DataFrame input.
-    """
-
-    def __init__(self, rename_dict: Dict[Hashable, Hashable]) -> None:
-        if not isinstance(rename_dict, dict):
-            raise AssertionError(
-                f'{self.__class__.__name__} constructor expected dictionary but got {type(rename_dict)} instead.'
-            )
-        self.rename_dict = rename_dict
-
-    def fit(self, X: pd.DataFrame, y: Optional[Iterable] = None) -> "CustomRenamingTransformer":
-        return self
-
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        if not isinstance(X, pd.DataFrame):
-            raise AssertionError(
-                f'{self.__class__.__name__}.transform expected Dataframe but got {type(X)} instead.'
-            )
-
-        missing_keys: Set[Hashable] = set(self.rename_dict.keys()) - set(X.columns)
-        if missing_keys:
-            raise AssertionError(
-                f"Columns {missing_keys}, are not in the data table"
-            )
-
-        return X.rename(columns=self.rename_dict)
-
-    def fit_transform(self, X: pd.DataFrame, y: Optional[Iterable] = None) -> pd.DataFrame:
-        return self.transform(X)
-
-
 class CustomOHETransformer(BaseEstimator, TransformerMixin):
     """
     A transformer that applies one-hot encoding to a specified column using pandas.get_dummies.
@@ -253,6 +208,97 @@ class CustomOHETransformer(BaseEstimator, TransformerMixin):
             )
 
         return pd.get_dummies(X, columns=[self.target_column], dtype=int)
+
+
+class CustomDropColumnsTransformer(BaseEstimator, TransformerMixin):
+    """
+    A transformer that either drops or keeps specified columns in a DataFrame.
+
+    This transformer follows the scikit-learn transformer interface and can be used in
+    a scikit-learn pipeline. It allows for selectively keeping or dropping columns
+    from a DataFrame based on a provided list.
+
+    Parameters
+    ----------
+    column_list : List[str]
+        List of column names to either drop or keep, depending on the action parameter.
+    action : str, default='drop'
+        The action to perform on the specified columns. Must be one of:
+        - 'drop': Remove the specified columns from the DataFrame
+        - 'keep': Keep only the specified columns in the DataFrame
+
+    Attributes
+    ----------
+    column_list : List[str]
+        The list of column names to operate on.
+    action : str
+        The action to perform ('drop' or 'keep').
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6], 'C': [7, 8, 9]})
+    >>>
+    >>> # Drop columns example
+    >>> dropper = CustomDropColumnsTransformer(column_list=['A', 'B'], action='drop')
+    >>> dropped_df = dropper.fit_transform(df)
+    >>> dropped_df.columns.tolist()
+    ['C']
+    >>>
+    >>> # Keep columns example
+    >>> keeper = CustomDropColumnsTransformer(column_list=['A', 'C'], action='keep')
+    >>> kept_df = keeper.fit_transform(df)
+    >>> kept_df.columns.tolist()
+    ['A', 'C']
+    """
+
+    def __init__(self, column_list: List[str], action: Literal['drop', 'keep'] = 'drop') -> None:
+        """
+        Initialize the CustomDropColumnsTransformer.
+
+        Parameters
+        ----------
+        column_list : List[str]
+            List of column names to either drop or keep.
+        action : str, default='drop'
+            The action to perform on the specified columns.
+            Must be either 'drop' or 'keep'.
+
+        Raises
+        ------
+        AssertionError
+            If action is not 'drop' or 'keep', or if column_list is not a list.
+        """
+        assert action in ['keep', 'drop'], f'DropColumnsTransformer action {action} not in ["keep", "drop"]'
+        assert isinstance(column_list, list), f'DropColumnsTransformer expected list but saw {type(column_list)}'
+        self.column_list: List[str] = column_list
+        self.action: Literal['drop', 'keep'] = action
+
+    def fit(self, X: pd.DataFrame, y=None) -> "CustomDropColumnsTransformer":
+        return self
+
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+        if not isinstance(X, pd.DataFrame):
+            raise AssertionError(
+                f'{self.__class__.__name__}.transform expected DataFrame but got {type(X)} instead.'
+            )
+
+        if self.action == 'keep':
+            missing_cols = set(self.column_list) - set(X.columns)
+            if missing_cols:
+                raise AssertionError(
+                    f'{self.__class__.__name__}.transform unknown columns to keep: {missing_cols}'
+                )
+            return X[self.column_list]
+
+        elif self.action == 'drop':
+            missing_cols = set(self.column_list) - set(X.columns)
+            if missing_cols:
+                warnings.warn(
+                    f'{self.__class__.__name__} does not contain these columns to drop: {missing_cols}.',
+                    UserWarning
+                )
+            return X.drop(columns=self.column_list, errors='ignore')
 
 # ================================== Chpt 2 Pipelines =================================
 
