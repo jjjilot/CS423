@@ -301,6 +301,46 @@ class CustomDropColumnsTransformer(BaseEstimator, TransformerMixin):
                 )
             return X.drop(columns=self.column_list, errors='ignore')
 
+
+class CustomPearsonTransformer(BaseEstimator, TransformerMixin):
+    """
+    A custom scikit-learn transformer that removes highly correlated features
+    based on Pearson correlation.
+
+    Parameters
+    ----------
+    threshold : float
+        The correlation threshold above which features are considered too highly correlated
+        and will be removed.
+
+    Attributes
+    ----------
+    correlated_columns : Optional[List[Hashable]]
+        A list of column names that are identified as highly correlated and will be removed.
+    """
+
+    def __init__(self, threshold=0.4):
+        self.threshold = threshold
+        self.correlated_columns = None
+
+    def fit(self, X, y=None):
+        df_corr = X.corr(method='pearson')
+        # Boolean mask of correlations above threshold
+        masked_df = df_corr.abs() > self.threshold
+        # Get upper triangle without diagonal
+        upper_mask = np.triu(masked_df.values, k=1)
+        # Find columns to drop
+        self.correlated_columns = [
+            masked_df.columns[i]
+            for i, col in enumerate(upper_mask.T)
+            if np.any(col)
+        ]
+        return self
+
+    def transform(self, X):
+        assert self.correlated_columns is not None, "PearsonTransformer.transform called before fit."
+        return X.drop(columns=self.correlated_columns)
+        
 # ================================== Chpt 2 Pipelines =================================
 
 titanic_transformer = Pipeline(steps=[
