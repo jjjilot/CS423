@@ -311,5 +311,5 @@ titanic_transformer = Pipeline(steps=[
 
 customer_transformer = Pipeline(steps=[
     #add drop step below
-    ('ID', CustomDropColumnsTransformer(col_list, 'drop'))
+    ('ID', CustomDropColumnsTransformer(['ID'], 'drop'))
     ], verbose=True)
