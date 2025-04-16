@@ -471,5 +471,6 @@ customer_transformer = Pipeline(steps=[
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('xp level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
     ('OS', CustomOHETransformer(target_column='OS')),
-    ('ISP', CustomOHETransformer(target_column='ISP'))
+    ('ISP', CustomOHETransformer(target_column='ISP')),
+    ('time spent', CustomTukeyTransformer('Time Spent', 'inner'))
     ], verbose=True)
