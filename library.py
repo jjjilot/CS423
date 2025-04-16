@@ -463,11 +463,13 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 titanic_transformer = Pipeline(steps=[
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
-    #add your new ohe step below
     ('joined', CustomOHETransformer(target_column='Joined'))
     ], verbose=True)
 
 customer_transformer = Pipeline(steps=[
-    #add drop step below
-    ('ID', CustomDropColumnsTransformer(['ID'], 'drop'))
+    ('ID', CustomDropColumnsTransformer(['ID'], 'drop')),
+    ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('xp level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
+    ('OS', CustomOHETransformer(target_column='OS')),
+    ('ISP', CustomOHETransformer(target_column='ISP'))
     ], verbose=True)
