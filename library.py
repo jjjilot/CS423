@@ -9,7 +9,7 @@ import sklearn
 import warnings
 sklearn.set_config(transform_output="pandas")  #says pass pandas tables through pipeline instead of numpy matrices
 
-# ======================================= Transformers =================================
+# ======================================= Transformers =======================================
 
 class CustomMappingTransformer(BaseEstimator, TransformerMixin):
     """
@@ -510,7 +510,7 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
         )
         return X_copy
         
-# ======================================== Pipelines =================================
+# ======================================== Pipelines =======================================
 
 titanic_transformer = Pipeline(steps=[
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
