@@ -520,10 +520,12 @@ titanic_transformer = Pipeline(steps=[
     ], verbose=True)
 
 customer_transformer = Pipeline(steps=[
-    ('ID', CustomDropColumnsTransformer(['ID'], 'drop')),
+    # ('ID', CustomDropColumnsTransformer(['ID'], 'drop')),
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('xp level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
-    ('OS', CustomOHETransformer(target_column='OS')),
+    ('OS', CustomMappingTransformer('OS', {'iOS': 1, 'Android': 0})),
     ('ISP', CustomOHETransformer(target_column='ISP')),
-    ('time spent', CustomTukeyTransformer('Time Spent', 'inner'))
+    ('time spent', CustomTukeyTransformer('Time Spent', 'inner')),
+    ('time spent robust', CustomRobustTransformer('Time Spent')),
+    ('age', CustomRobustTransformer('Age')),
     ], verbose=True)
