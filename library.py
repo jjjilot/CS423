@@ -457,6 +457,58 @@ class CustomTukeyTransformer(BaseEstimator, TransformerMixin):
 
         X_copy[self.target_column] = X_copy[self.target_column].clip(low, high)
         return X_copy.reset_index(drop=True)
+
+
+class CustomRobustTransformer(BaseEstimator, TransformerMixin):
+    """Applies robust scaling to a specified column in a pandas DataFrame.
+      This transformer calculates the interquartile range (IQR) and median
+      during the `fit` method and then uses these values to scale the
+      target column in the `transform` method.
+
+      Parameters
+      ----------
+      column : str
+          The name of the column to be scaled.
+
+      Attributes
+      ----------
+      target_column : str
+          The name of the column to be scaled.
+      iqr : float
+          The interquartile range of the target column.
+      med : float
+          The median of the target column.
+    """
+    def __init__(self, column):
+        self.target_column = column
+        self.iqr = None
+        self.med = None
+        self._is_fitted = False
+
+    def fit(self, X, y=None):
+        if self.target_column not in X.columns:
+            raise AssertionError(f"CustomRobustTransformer.fit unrecognizable column {self.target_column}.")
+        
+        col_data = X[self.target_column].dropna()
+        q1 = col_data.quantile(0.25)
+        q3 = col_data.quantile(0.75)
+        self.iqr = q3 - q1
+        self.med = col_data.median()
+        self._is_fitted = True
+        return self
+
+    def transform(self, X):
+        if not self._is_fitted:
+            raise AssertionError("NotFittedError: This CustomRobustTransformer instance is not fitted yet. Call \"fit\" with appropriate arguments before using this estimator.")
+        
+        X_copy = X.copy()
+        if self.iqr == 0 or self.med == 0:
+            return X_copy  # skip binary or degenerate column
+
+        X_copy[self.target_column] = X_copy[self.target_column].apply(
+            lambda x: (x - self.med) / self.iqr if pd.notnull(x) else x
+        )
+        return X_copy
         
 # ================================== Chpt 2 Pipelines =================================
 
