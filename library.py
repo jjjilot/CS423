@@ -510,7 +510,7 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
         )
         return X_copy
         
-# ================================== Chpt 2 Pipelines =================================
+# ======================================== Pipelines =================================
 
 titanic_transformer = Pipeline(steps=[
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
