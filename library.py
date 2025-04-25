@@ -9,7 +9,7 @@ import sklearn
 import warnings
 sklearn.set_config(transform_output="pandas")  #says pass pandas tables through pipeline instead of numpy matrices
 
-# ================================== Chpt 2 Transformers =================================
+# ======================================= Transformers =================================
 
 class CustomMappingTransformer(BaseEstimator, TransformerMixin):
     """
