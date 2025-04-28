@@ -509,6 +509,59 @@ class CustomRobustTransformer(BaseEstimator, TransformerMixin):
             lambda x: (x - self.med) / self.iqr if pd.notnull(x) else x
         )
         return X_copy
+
+
+class CustomKNNTransformer(BaseEstimator, TransformerMixin):
+  """Imputes missing values using KNN.
+
+  This transformer wraps the KNNImputer from scikit-learn and hard-codes
+  add_indicator to be False. It also ensures that the input and output
+  are pandas DataFrames.
+
+  Parameters
+  ----------
+  n_neighbors : int, default=5
+      Number of neighboring samples to use for imputation.
+  weights : {'uniform', 'distance'}, default='uniform'
+      Weight function used in prediction. Possible values:
+      "uniform" : uniform weights. All points in each neighborhood
+      are weighted equally.
+      "distance" : weight points by the inverse of their distance.
+      in this case, closer neighbors of a query point will have a
+      greater influence than neighbors which are further away.
+  """
+  # Custom Typing!
+  PositiveInt = Annotated[int, lambda x: x > 0]
+
+  def __init__(self, n_neighbors: PositiveInt = 5, weights: str = "uniform"):
+      self.n_neighbors = n_neighbors
+      self.weights = weights
+      self.knn_imputer = KNNImputer(n_neighbors=n_neighbors, weights=weights, add_indicator=False)
+      self._is_fitted = False  # track if fit was called
+      self._fit_columns = None  # store columns fitted on
+
+  def fit(self, X: pd.DataFrame, y=None):
+      # Check if n_neighbors is greater than number of samples
+      if self.n_neighbors > len(X):
+          warnings.warn("n_neighbors is greater than number of samples. KNNImputer may behave unexpectedly.")
+
+      self.knn_imputer.fit(X)
+      self._is_fitted = True
+      self._fit_columns = X.columns.tolist()
+      return self
+
+  def transform(self, X: pd.DataFrame):
+      if not self._is_fitted:
+          raise AssertionError("NotFittedError: This CustomKNNTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator.")
+
+      # Check if columns match what we fitted on
+      if X.columns.tolist() != self._fit_columns:
+          warnings.warn("Column names mismatch between fit and transform data. Transform may fail or produce incorrect results.")
+
+      return self.knn_imputer.transform(X)
+
+  def fit_transform(self, X: pd.DataFrame, y=None):
+      return self.fit(X, y).transform(X)
         
 # ======================================== Pipelines =======================================
 
@@ -523,12 +576,13 @@ titanic_transformer = Pipeline(steps=[
     ], verbose=True)
 
 customer_transformer = Pipeline(steps=[
-    # ('ID', CustomDropColumnsTransformer(['ID'], 'drop')),
+    ('ID', CustomDropColumnsTransformer(['ID'], 'drop')),
     ('gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('xp level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
-    ('OS', CustomMappingTransformer('OS', {'iOS': 1, 'Android': 0})),
+    ('OS', CustomOHETransformer(target_column='OS')),
     ('ISP', CustomOHETransformer(target_column='ISP')),
     ('time spent', CustomTukeyTransformer('Time Spent', 'inner')),
     ('time spent robust', CustomRobustTransformer('Time Spent')),
     ('age', CustomRobustTransformer('Age')),
+    ('KNN', CustomKNNTransformer(weights='distance'))
     ], verbose=True)
