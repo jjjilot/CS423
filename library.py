@@ -576,8 +576,8 @@ class CustomTargetTransformer(BaseEstimator, TransformerMixin):
         Smoothing factor. Higher values give more weight to the global mean.
     """
 
-    def __init__(self, target_column: str, smoothing: float =10.0):
-        self.col = target_column
+    def __init__(self, col: str, smoothing: float =10.0):
+        self.col = col
         self.smoothing = smoothing
         self.global_mean_ = None
         self.encoding_dict_ = None
@@ -675,8 +675,8 @@ customer_transformer = Pipeline(steps=[
     ('drop_ID', CustomDropColumnsTransformer(['ID'], 'drop')),
     ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
     ('map_xp_level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high': 2})),
-    ('target_OS', CustomTargetTransformer(target_column='OS')),
-    ('target_ISP', CustomTargetTransformer(target_column='ISP')),
+    ('target_OS', CustomTargetTransformer(col='OS')),
+    ('target_ISP', CustomTargetTransformer(col='ISP')),
     ('tukey_time_spent', CustomTukeyTransformer('Time Spent', 'inner')),
     ('scale_time_spent robust', CustomRobustTransformer('Time Spent')),
     ('scale_age', CustomRobustTransformer('Age')),
