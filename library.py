@@ -4,6 +4,7 @@ import numpy as np
 import types
 from typing import Dict, Any, Optional, Union, List, Set, Hashable, Literal, Tuple, Self, Iterable, Annotated
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.impute import KNNImputer
 from sklearn.pipeline import Pipeline
 import sklearn
 import warnings
