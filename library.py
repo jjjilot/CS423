@@ -707,6 +707,8 @@ def find_random_state(
     model = KNeighborsClassifier(n_neighbors=5)
     Var: List[float] = []  # Collect test_f1/train_f1 ratios
 
+    train_X, test_X, train_y, test_y = []
+                      
     for i in range(n):
         train_X, test_X, train_y, test_y = train_test_split(
             features_df, labels, test_size=0.2, shuffle=True,
