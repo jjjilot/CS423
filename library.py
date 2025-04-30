@@ -6,6 +6,8 @@ from typing import Dict, Any, Optional, Union, List, Set, Hashable, Literal, Tup
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import FunctionTransformer
+from sklearn.metrics import f1_score  #typical metric used to measure goodness of a model
+from sklearn.neighbors import KNeighborsClassifier  #the KNN model
 from sklearn.pipeline import Pipeline
 import sklearn
 import warnings
