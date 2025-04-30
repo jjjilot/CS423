@@ -669,6 +669,7 @@ titanic_transformer = Pipeline(steps=[
     ('scale_age', CustomRobustTransformer(target_column='Age')),
     ('scale_fare', CustomRobustTransformer(target_column='Fare')),
     ('impute', CustomKNNTransformer(n_neighbors=5)),
+    ('passthrough', FunctionTransformer(validate=False)),  #does nothing but does remove warning
     ], verbose=True)
 
 customer_transformer = Pipeline(steps=[
