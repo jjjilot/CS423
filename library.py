@@ -8,6 +8,7 @@ from sklearn.impute import KNNImputer
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.metrics import f1_score  #typical metric used to measure goodness of a model
 from sklearn.neighbors import KNeighborsClassifier  #the KNN model
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 import sklearn
 import warnings
@@ -706,8 +707,6 @@ def find_random_state(
 
     model = KNeighborsClassifier(n_neighbors=5)
     Var: List[float] = []  # Collect test_f1/train_f1 ratios
-
-    train_X, test_X, train_y, test_y = []
                       
     for i in range(n):
         train_X, test_X, train_y, test_y = train_test_split(
