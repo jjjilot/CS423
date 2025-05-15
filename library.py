@@ -5,7 +5,7 @@ import types
 from typing import Dict, Any, Optional, Union, List, Set, Hashable, Literal, Tuple, Self, Iterable, Annotated
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import KNNImputer
-from sklearn.preprocessing import FunctionTransforme
+from sklearn.preprocessing import FunctionTransformer
 from sklearn.neighbors import KNeighborsClassifier  #the KNN model
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
