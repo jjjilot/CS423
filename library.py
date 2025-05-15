@@ -664,6 +664,33 @@ class CustomTargetTransformer(BaseEstimator, TransformerMixin):
             Target values.
         """
         return self.fit(X, y).transform(X)
+        
+# ======================================== Pipelines =======================================
+
+titanic_transformer = Pipeline(steps=[
+    ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('map_class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
+    ('target_joined', CustomTargetTransformer(col='Joined', smoothing=10)),
+    ('tukey_age', CustomTukeyTransformer(target_column='Age', fence='outer')),
+    ('tukey_fare', CustomTukeyTransformer(target_column='Fare', fence='outer')),
+    ('scale_age', CustomRobustTransformer(target_column='Age')),
+    ('scale_fare', CustomRobustTransformer(target_column='Fare')),
+    ('impute', CustomKNNTransformer(n_neighbors=5)),
+    ('passthrough', FunctionTransformer(validate=False)),  #does nothing but does remove warning
+    ], verbose=True)
+
+customer_transformer = Pipeline(steps=[
+    ('map_os', CustomMappingTransformer('OS', {'Android': 0, 'iOS': 1})),
+    ('target_isp', CustomTargetTransformer(col='ISP')),
+    ('map_level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high':2})),
+    ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
+    ('tukey_age', CustomTukeyTransformer('Age', 'inner')),  #from chapter 4
+    ('tukey_time spent', CustomTukeyTransformer('Time Spent', 'inner')),  #from chapter 4
+    ('scale_age', CustomRobustTransformer(target_column='Age')), #from 5
+    ('scale_time spent', CustomRobustTransformer(target_column='Time Spent')), #from 5
+    ('impute', CustomKNNTransformer(n_neighbors=5)),
+    ('passthrough', FunctionTransformer(validate=False)),  #does nothing but does remove warning
+    ], verbose=True)
 
 # ==================================== Auxiliary Functions =================================
 
@@ -791,30 +818,3 @@ def threshold_results(thresh_list, actuals, predicted):
     fancy_df = result_df.style.highlight_max(color = 'pink', axis = 0).format(precision=2).set_properties(**properties).set_table_styles([headers])
     return (result_df, fancy_df)
 
-        
-# ======================================== Pipelines =======================================
-
-titanic_transformer = Pipeline(steps=[
-    ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
-    ('map_class', CustomMappingTransformer('Class', {'Crew': 0, 'C3': 1, 'C2': 2, 'C1': 3})),
-    ('target_joined', CustomTargetTransformer(col='Joined', smoothing=10)),
-    ('tukey_age', CustomTukeyTransformer(target_column='Age', fence='outer')),
-    ('tukey_fare', CustomTukeyTransformer(target_column='Fare', fence='outer')),
-    ('scale_age', CustomRobustTransformer(target_column='Age')),
-    ('scale_fare', CustomRobustTransformer(target_column='Fare')),
-    ('impute', CustomKNNTransformer(n_neighbors=5)),
-    ('passthrough', FunctionTransformer(validate=False)),  #does nothing but does remove warning
-    ], verbose=True)
-
-customer_transformer = Pipeline(steps=[
-    ('map_os', CustomMappingTransformer('OS', {'Android': 0, 'iOS': 1})),
-    ('target_isp', CustomTargetTransformer(col='ISP')),
-    ('map_level', CustomMappingTransformer('Experience Level', {'low': 0, 'medium': 1, 'high':2})),
-    ('map_gender', CustomMappingTransformer('Gender', {'Male': 0, 'Female': 1})),
-    ('tukey_age', CustomTukeyTransformer('Age', 'inner')),  #from chapter 4
-    ('tukey_time spent', CustomTukeyTransformer('Time Spent', 'inner')),  #from chapter 4
-    ('scale_age', CustomRobustTransformer(target_column='Age')), #from 5
-    ('scale_time spent', CustomRobustTransformer(target_column='Time Spent')), #from 5
-    ('impute', CustomKNNTransformer(n_neighbors=5)),
-    ('passthrough', FunctionTransformer(validate=False)),  #does nothing but does remove warning
-    ], verbose=True)
