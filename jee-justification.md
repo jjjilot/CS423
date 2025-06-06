@@ -2,149 +2,138 @@
 
 ## Pipeline Overview
 
-This pipeline preprocesses the JEE dataset to prepare it for machine learning modeling. It includes feature selection, categorical encoding, outlier detection and treatment, feature scaling, and missing value imputation.
-
-Feature selection was performed using correlation matrix analysis and LightGBM feature importance to retain only the most relevant predictors.
+This pipeline preprocesses the JEE dataset to prepare it for machine learning modeling. It includes categorical encoding, outlier detection and treatment, robust feature scaling, and missing value imputation. These transformations ensure that the dataset is numerically clean, standardized, and suitable for downstream algorithms.
 
 ---
 
 ## Pipeline Diagram
 
-![Pipeline Diagram](jee-pipeline.png)
+![Pipeline Diagram](pipeline_diagram.png)
 
 ---
 
 ## Step-by-Step Design Choices
 
-### 1. Column Selection (`drop_cols`)
-- **Transformer**: `CustomDropColumnsTransformer(column_list=['daily_study_hours', 'family_income', 'peer_pressure_level', 'admission_taken', 'jee_main_score', 'jee_advanced_score', 'class_12_percent'], action='keep')`
-- **Design Choice**: Retain only a subset of strongly predictive features  
-- **Rationale**:  
-  - Features selected using correlation matrix and LightGBM importance  
-  - Reduces noise and improves downstream model performance  
-
----
-
-### 2. Family Income Mapping (`map_family_income`)
+### 1. Family Income Mapping (`map_family_income`)
 - **Transformer**: `CustomMappingTransformer('family_income', {'Low': 0, 'Mid': 1, 'High': 2})`
-- **Design Choice**: Ordinal encoding  
+- **Design Choice**: Ordinal encoding of family income  
 - **Rationale**:  
-  - Captures the natural order in income levels  
-  - Maintains simplicity while preserving economic gradient  
+  - Preserves the natural order of economic status  
+  - Enables numerical treatment in models without inflating dimensionality  
 
 ---
 
-### 3. Peer Pressure Level Mapping (`map_peer_pressure`)
+### 2. Peer Pressure Level Mapping (`map_peer_pressure`)
 - **Transformer**: `CustomMappingTransformer('peer_pressure_level', {'Low': 0, 'Medium': 1, 'High': 2})`
-- **Design Choice**: Ordinal encoding  
+- **Design Choice**: Ordinal encoding of peer pressure  
 - **Rationale**:  
-  - Encodes peer pressure levels as increasing numeric values  
-  - Maintains relationship structure for model learning  
+  - Encodes increasing levels of psychological pressure numerically  
+  - Maintains order structure while enabling quantitative modeling  
 
 ---
 
-### 4. Admission Taken Mapping (`map_admission_taken`)
+### 3. Admission Taken Mapping (`map_admission_taken`)
 - **Transformer**: `CustomMappingTransformer('admission_taken', {'No': 0, 'Yes': 1})`
 - **Design Choice**: Binary encoding  
 - **Rationale**:  
-  - Converts categorical decision to binary  
-  - Enables use in numerical models without added complexity  
+  - Converts categorical outcome into a numeric binary feature  
+  - Simplifies downstream processing and model compatibility  
 
 ---
 
-### 5. Outlier Treatment for Study Hours (`tukey_study_hours`)
+### 4. Outlier Treatment for Daily Study Hours (`tukey_study_hours`)
 - **Transformer**: `CustomTukeyTransformer(target_column='daily_study_hours', fence='outer')`
-- **Design Choice**: Outer Tukey fence  
+- **Design Choice**: Tukey outer fence for outlier detection  
 - **Rationale**:  
-  - Identifies and manages only the most extreme outliers  
-  - Preserves legitimate variation in study habits  
+  - Identifies and treats extreme values  
+  - Preserves reasonable variance while improving feature reliability  
 
 ---
 
-### 6. Study Hours Scaling (`scale_study_hours`)
+### 5. Study Hours Scaling (`scale_study_hours`)
 - **Transformer**: `CustomRobustTransformer(target_column='daily_study_hours')`
 - **Design Choice**: Robust scaling  
 - **Rationale**:  
-  - Minimizes influence of remaining outliers  
-  - Ensures compatibility with distance-based models  
+  - Normalizes values based on median and IQR  
+  - Reduces the influence of remaining outliers on model training  
 
 ---
 
-### 7. Outlier Treatment for JEE Main Score (`tukey_main_score`)
+### 6. Outlier Treatment for JEE Main Score (`tukey_main_score`)
 - **Transformer**: `CustomTukeyTransformer(target_column='jee_main_score', fence='outer')`
 - **Design Choice**: Tukey outer fence  
 - **Rationale**:  
-  - Main exam scores may include anomalies  
-  - Outer fence removes only extreme, unlikely values  
+  - Treats abnormal examination scores  
+  - Improves statistical consistency across records  
 
 ---
 
-### 8. Main Score Scaling (`scale_main_score`)
+### 7. Main Score Scaling (`scale_main_score`)
 - **Transformer**: `CustomRobustTransformer(target_column='jee_main_score')`
 - **Design Choice**: Robust scaling  
 - **Rationale**:  
-  - Retains score distribution while limiting outlier impact  
+  - Ensures comparability of values  
+  - Minimizes distortion from score-based anomalies  
 
 ---
 
-### 9. Outlier Treatment for JEE Advanced Score (`tukey_advanced_score`)
+### 8. Outlier Treatment for JEE Advanced Score (`tukey_advanced_score`)
 - **Transformer**: `CustomTukeyTransformer(target_column='jee_advanced_score', fence='outer')`
 - **Design Choice**: Tukey outer fence  
 - **Rationale**:  
-  - Identifies extreme exam performance outliers  
-  - Reduces distortion in downstream scaling  
+  - Removes or limits the impact of extreme advanced scores  
+  - Enhances stability in predictive modeling  
 
 ---
 
-### 10. Advanced Score Scaling (`scale_advanced_score`)
+### 9. Advanced Score Scaling (`scale_advanced_score`)
 - **Transformer**: `CustomRobustTransformer(target_column='jee_advanced_score')`
 - **Design Choice**: Robust scaling  
 - **Rationale**:  
-  - Standardizes input while minimizing outlier effects  
+  - Protects against skew in the score distribution  
+  - Centers and scales scores for model compatibility  
 
 ---
 
-### 11. Outlier Treatment for Class 12 Percent (`tukey_12_percent`)
+### 10. Outlier Treatment for Class 12 Percent (`tukey_12_percent`)
 - **Transformer**: `CustomTukeyTransformer(target_column='class_12_percent', fence='outer')`
 - **Design Choice**: Tukey outer fence  
 - **Rationale**:  
-  - Academic scores may include inflated or unusual entries  
-  - Outer fence treats only extreme deviations  
+  - Detects and adjusts anomalous academic performance values  
+  - Improves the integrity of the feature  
 
 ---
 
-### 12. Class 12 Percent Scaling (`scale_12_percent`)
+### 11. Class 12 Percent Scaling (`scale_12_percent`)
 - **Transformer**: `CustomRobustTransformer(target_column='class_12_percent')`
 - **Design Choice**: Robust scaling  
 - **Rationale**:  
-  - Reduces the influence of grade outliers  
-  - Provides standardized input for models  
+  - Standardizes feature values using IQR  
+  - Ensures the feature is comparable across all rows  
 
 ---
 
-### 13. Imputation (`impute`)
+### 12. Imputation (`impute`)
 - **Transformer**: `CustomKNNTransformer(n_neighbors=5)`
-- **Design Choice**: KNN imputation with `k=5`  
+- **Design Choice**: KNN-based imputation  
 - **Rationale**:  
-  - Estimates missing values based on nearby samples  
-  - Balances between overfitting and underfitting  
-  - Preserves multivariate structure  
+  - Fills missing values using similarity between records  
+  - Maintains feature relationships better than simple mean or median  
 
 ---
 
 ## Pipeline Execution Order Rationale
 
-1. **Column selection**: Retain only informative, relevant features  
-2. **Categorical encoding**: Converts non-numeric values early in the pipeline  
-3. **Outlier treatment**: Conducted prior to scaling to protect scaling statistics  
-4. **Scaling**: Ensures consistency across features for imputation  
-5. **Imputation**: Final step, filling missing values based on clean, scaled data  
+1. **Categorical encoding**: Transforms string-based features to numerical representations early for compatibility  
+2. **Outlier treatment**: Identifies and adjusts extreme values before scaling  
+3. **Scaling**: Normalizes numerical ranges to avoid scale bias  
+4. **Imputation**: Applied last so KNN has access to fully transformed data  
 
 ---
 
 ## Performance Considerations
 
-- **Feature selection**: Based on empirical correlation and LightGBM analysis  
-- **Tukey fences**: Conservative outlier removal strategy avoids unnecessary trimming  
-- **Robust scaling**: More resilient to skewed or non-normal data  
-- **KNN imputation**: Effective for maintaining feature interactions and continuity  
+- **Ordinal mappings**: Enable ordered categorical features to be used numerically  
+- **Tukey fences**: Remove only extreme outliers while preserving meaningful variation  
+- **Robust scaling**: Mitigates the effects of skew and outliers  
+- **KNN imputation**: Preserves structural relationships between features, improving model generalization  
