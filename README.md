@@ -1,4 +1,8 @@
 # CS423
+_Project Instructions:_
+
+_Navigate to [this](https://colab.research.google.com/drive/1q8rCDweTWojh6xu-HHBGt3hSdwe_Krvh) notebook and select "run before" from the runtime menu while in the last cell. Website can be accessed through the link created in the output of the previous cell._
+
 From Syllabus:
 
 This course has a specific interest in using AI systems in software products. The course will look at ways to add an AI component to an existing web-based system to enhance the system’s capabilities. The course will take a human-in-the-loop approach, augmenting a human user instead of attempting to replace them. Because of this, issues with explainability must be considered.
@@ -12,6 +16,3 @@ Specific topics we will take up are:
 
 Taught by Prof. Stephen Fickas at University of Oregon.
 
-_Project Instructions:_
-
-_Navigate to [this](https://colab.research.google.com/drive/1q8rCDweTWojh6xu-HHBGt3hSdwe_Krvh) notebook and select "run before" from the runtime menu while in the last cell. Website can be accessed through the link created in the output of the previous cell._
