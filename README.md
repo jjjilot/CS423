@@ -11,3 +11,7 @@ Specific topics we will take up are:
 - Giving users the ability to judge AI results by providing effective explanations.
 
 Taught by Prof. Stephen Fickas at University of Oregon.
+
+Project Instructions:
+
+Navigate to [this](https://colab.research.google.com/drive/1q8rCDweTWojh6xu-HHBGt3hSdwe_Krvh) notebook and select "run before" from the runtime menu while in the last cell. Website can be accessed through the link created in the output of the previous cell.
