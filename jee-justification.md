@@ -6,7 +6,7 @@ This pipeline preprocesses the JEE dataset to prepare it for machine learning mo
 
 ---
 
-## Pipeline Diagram
+## Pipeline Implementation
 
 ![jee_pipeline.png](https://raw.githubusercontent.com/jjjilot/CS423/refs/heads/main/jee_pipeline.png)
 
