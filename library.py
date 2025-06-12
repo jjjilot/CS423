@@ -567,7 +567,11 @@ class CustomKNNTransformer(BaseEstimator, TransformerMixin):
       if X.columns.tolist() != self._fit_columns:
           warnings.warn("Column names mismatch between fit and transform data. Transform may fail or produce incorrect results.")
 
-      return self.knn_imputer.transform(X)
+      imputed_array = self.knn_imputer.transform(X)
+        
+      # Convert to DataFrame manually
+      imputed_df = pd.DataFrame(imputed_array, columns=self._fit_columns, index=X.index)
+      return imputed_df
 
   def fit_transform(self, X: pd.DataFrame, y=None):
       return self.fit(X, y).transform(X)
